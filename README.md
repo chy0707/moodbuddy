@@ -63,6 +63,11 @@ MoodBuddy is built around a few core principles:
 - Temperature unit preference (°C / °F)
 
 ---
+## 📄 Product & Design
+
+- [Product Design Document](docs/product-design.md)  
+  A detailed overview of MoodBuddy’s product goals, design principles, MVP scope, and future directions.
+---
 
 ## 🛠 Tech Stack
 
