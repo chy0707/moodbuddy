@@ -71,11 +71,29 @@ MoodBuddy is built around a few core principles:
 </p>
 
 ---
-## 📄 Product & Design
+## 📄 Product Design Initiative
 
 - [Product Design Document](docs/product-design.md)  
   A detailed overview of MoodBuddy’s product goals, design principles, MVP scope, and future directions.
 ---
+## 🎨 App Icon Design
+
+<p align="center">
+  <img src="screenshots/icon/moodbuddy_icons.png" width="160" />
+</p>
+
+The MoodBuddy app icon is designed to represent **gentle presence rather than explicit emotion**.
+
+Instead of expressive faces or emotionally charged symbols, the icon uses a soft, abstract combination of a **moon and sun**, symbolizing emotional cycles, balance, and continuity over time. The rounded square shape provides a sense of stability, while the minimal geometry keeps the visual experience calm and non-intrusive.
+
+This design reflects MoodBuddy’s core philosophy:
+
+- Emotions are **observed, not judged**
+- Well-being is **cyclical, not linear**
+- Support should feel **safe, calm, and optional**
+
+MoodBuddy is not here to tell users how they should feel —  
+it simply offers a quiet space where feelings are allowed to exist.
 
 ## 🛠 Tech Stack
 
