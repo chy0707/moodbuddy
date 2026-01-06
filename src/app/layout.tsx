@@ -8,9 +8,9 @@ import DisclaimerGate from '../components/DisclaimerGate';
 
 import { PreferencesProvider } from '../components/PreferencesProvider';
 
-export const metadata: Metadata = {
+export const metadata = {
   title: 'MoodBuddy',
-  description: 'A lightweight mood check-in app',
+  description: 'A gentle mood companion for everyday mental wellness.',
 };
 
 export default function RootLayout({
