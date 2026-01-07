@@ -5,11 +5,12 @@ import BottomTab from '../components/BottomTab';
 import SettingsIconButton from '../components/SettingsIconButton';
 import NotificationIconButton from '../components/NotificationIconButton';
 import DisclaimerGate from '../components/DisclaimerGate';
+import InstallPrompt from '../components/InstallPrompt';
 
 import { PreferencesProvider } from '../components/PreferencesProvider';
 
 export const metadata = {
-  title: 'MoodBuddy',
+  title: 'Anchor',
   description: 'A gentle mood companion for everyday mental wellness.',
 };
 
@@ -36,6 +37,7 @@ export default function RootLayout({
 
           {/* ===== Bottom navigation (mobile) ===== */}
           <BottomTab />
+          <InstallPrompt />
         </PreferencesProvider>
       </body>
     </html>

@@ -122,18 +122,46 @@ type GentleActionsStore = {
   refreshNonce: number; // increments when user refreshes remaining items
 };
 
-const GENTLE_ACTIONS_STORAGE_KEY = 'moodbuddy.gentleActions.v1';
-const GENTLE_ACTIONS_HISTORY_KEY = 'moodbuddy.gentleActions.history.v1';
-const GENTLE_ACTIONS_COMPLETION_STATS_KEY = 'moodbuddy.gentleActions.completionStats.v1';
-const GENTLE_ACTIONS_STAGE_KEY = 'moodbuddy.gentleActions.stage.v1';
+const GENTLE_ACTIONS_STORAGE_KEY = 'anchor.gentleActions.v1';
+const LEGACY_GENTLE_ACTIONS_STORAGE_KEY = 'moodbuddy.gentleActions.v1';
+
+const GENTLE_ACTIONS_HISTORY_KEY = 'anchor.gentleActions.history.v1';
+const LEGACY_GENTLE_ACTIONS_HISTORY_KEY = 'moodbuddy.gentleActions.history.v1';
+
+const GENTLE_ACTIONS_COMPLETION_STATS_KEY = 'anchor.gentleActions.completionStats.v1';
+const LEGACY_GENTLE_ACTIONS_COMPLETION_STATS_KEY = 'moodbuddy.gentleActions.completionStats.v1';
+
+const GENTLE_ACTIONS_STAGE_KEY = 'anchor.gentleActions.stage.v1';
+const LEGACY_GENTLE_ACTIONS_STAGE_KEY = 'moodbuddy.gentleActions.stage.v1';
+
 type GentleActionsStageStore = { date: string; stage: 'none' | 'congrats' | 'insights' };
+
+function getLocalStorageRawWithLegacy(primaryKey: string, legacyKey: string) {
+  const rawNew = localStorage.getItem(primaryKey);
+  const rawLegacy = rawNew ? null : localStorage.getItem(legacyKey);
+  return { rawNew, rawLegacy, raw: rawNew ?? rawLegacy };
+}
 
 function readStageStore(): GentleActionsStageStore | null {
   try {
-    const raw = localStorage.getItem(GENTLE_ACTIONS_STAGE_KEY);
+    const { rawNew, rawLegacy, raw } = getLocalStorageRawWithLegacy(
+      GENTLE_ACTIONS_STAGE_KEY,
+      LEGACY_GENTLE_ACTIONS_STAGE_KEY
+    );
     if (!raw) return null;
+
     const parsed = JSON.parse(raw) as GentleActionsStageStore;
     if (!parsed?.date || !parsed?.stage) return null;
+
+    // One-time migration (best-effort)
+    if (!rawNew && rawLegacy) {
+      try {
+        localStorage.setItem(GENTLE_ACTIONS_STAGE_KEY, rawLegacy);
+      } catch {
+        // ignore
+      }
+    }
+
     return parsed;
   } catch {
     return null;
@@ -187,6 +215,12 @@ const GENTLE_ACTIONS: GentleActionItem[] = [
 ];
 
 const CHECKIN_CANDIDATE_KEYS = [
+  // New (Anchor)
+  'anchor.checkin.latest.v1',
+  'anchor.checkin.v1',
+  'anchor.checkin.latest',
+  'anchor.checkin',
+  // Legacy (MoodBuddy)
   'moodbuddy.checkin.latest.v1',
   'moodbuddy.checkin.v1',
   'moodbuddy.checkin.latest',
@@ -341,9 +375,26 @@ function addDaysKey(baseKey: string, deltaDays: number) {
 
 function readCompletionHistory(): string[] {
   try {
-    const raw = localStorage.getItem(GENTLE_ACTIONS_HISTORY_KEY);
+    const { rawNew, rawLegacy, raw } = getLocalStorageRawWithLegacy(
+      GENTLE_ACTIONS_HISTORY_KEY,
+      LEGACY_GENTLE_ACTIONS_HISTORY_KEY
+    );
     const parsed = raw ? (JSON.parse(raw) as unknown) : null;
-    if (Array.isArray(parsed)) return parsed.filter((x) => typeof x === 'string');
+
+    if (Array.isArray(parsed)) {
+      const result = parsed.filter((x) => typeof x === 'string');
+
+      // One-time migration (best-effort)
+      if (!rawNew && rawLegacy) {
+        try {
+          localStorage.setItem(GENTLE_ACTIONS_HISTORY_KEY, rawLegacy);
+        } catch {
+          // ignore
+        }
+      }
+
+      return result;
+    }
   } catch {
     // ignore
   }
@@ -372,9 +423,22 @@ type GentleCompletionStats = Record<string, { total: number; completed: number }
 
 function readCompletionStats(): GentleCompletionStats {
   try {
-    const raw = localStorage.getItem(GENTLE_ACTIONS_COMPLETION_STATS_KEY);
+    const { rawNew, rawLegacy, raw } = getLocalStorageRawWithLegacy(
+      GENTLE_ACTIONS_COMPLETION_STATS_KEY,
+      LEGACY_GENTLE_ACTIONS_COMPLETION_STATS_KEY
+    );
     const parsed = raw ? (JSON.parse(raw) as unknown) : null;
+
     if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      // One-time migration (best-effort)
+      if (!rawNew && rawLegacy) {
+        try {
+          localStorage.setItem(GENTLE_ACTIONS_COMPLETION_STATS_KEY, rawLegacy);
+        } catch {
+          // ignore
+        }
+      }
+
       return parsed as GentleCompletionStats;
     }
   } catch {
@@ -507,7 +571,10 @@ export default function HomeOverview() {
   useEffect(() => {
     try {
       const tk = todayKey();
-      const raw = localStorage.getItem(GENTLE_ACTIONS_STORAGE_KEY);
+      const { rawNew, rawLegacy, raw } = getLocalStorageRawWithLegacy(
+        GENTLE_ACTIONS_STORAGE_KEY,
+        LEGACY_GENTLE_ACTIONS_STORAGE_KEY
+      );
 
       const base: GentleActionsStore = {
         date: tk,
@@ -535,7 +602,15 @@ export default function HomeOverview() {
 
       const next: GentleActionsStore = { ...base, checked, refreshNonce, assignedIds };
       setGentleActions(next);
-      localStorage.setItem(GENTLE_ACTIONS_STORAGE_KEY, JSON.stringify(next));
+      try {
+        localStorage.setItem(GENTLE_ACTIONS_STORAGE_KEY, JSON.stringify(next));
+        // If we loaded from legacy, keep legacy in sync too (best-effort)
+        if (!rawNew && rawLegacy) {
+          localStorage.setItem(LEGACY_GENTLE_ACTIONS_STORAGE_KEY, JSON.stringify(next));
+        }
+      } catch {
+        // ignore
+      }
     } catch {
       // ignore
     }
