@@ -1,43 +1,41 @@
-import type { Metadata } from 'next';
+// src/app/layout.tsx
 import './globals.css';
+import type { Metadata } from 'next';
 
-import BottomTab from '../components/BottomTab';
-import SettingsIconButton from '../components/SettingsIconButton';
-import NotificationIconButton from '../components/NotificationIconButton';
+import AppSplash from '../components/AppSplash';
 import DisclaimerGate from '../components/DisclaimerGate';
-import InstallPrompt from '../components/InstallPrompt';
-
+import BottomTab from '../components/BottomTab';
+import NotificationIconButton from '../components/NotificationIconButton';
+import SettingsIconButton from '../components/SettingsIconButton';
 import { PreferencesProvider } from '../components/PreferencesProvider';
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'Anchor',
   description: 'A gentle mood companion for everyday mental wellness.',
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="bg-gray-50 dark:bg-black pb-16">
         <PreferencesProvider>
-          {/* ===== First-run Disclaimer (global) ===== */}
-          <DisclaimerGate />
+          {/* App splash screen (shown once per day on first open) */}
+          <AppSplash />
 
-          {/* ===== Top-left: notification (only renders on homepage internally) ===== */}
-          <NotificationIconButton />
+          {/* First-run disclaimer gate (only shows until user acknowledges) */}
+          <DisclaimerGate>
+            {/* Top-left: notification (homepage only internally) */}
+            <NotificationIconButton />
 
-          {/* ===== Top-right: settings ===== */}
-          <SettingsIconButton />
+            {/* Top-right: settings */}
+            <SettingsIconButton />
 
-          {/* ===== Page content ===== */}
-          {children}
+            {/* Main page content */}
+            {children}
 
-          {/* ===== Bottom navigation (mobile) ===== */}
-          <BottomTab />
-          <InstallPrompt />
+            {/* Bottom navigation (mobile) */}
+            <BottomTab />
+          </DisclaimerGate>
         </PreferencesProvider>
       </body>
     </html>
